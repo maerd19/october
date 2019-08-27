@@ -1,3 +1,11 @@
+// level definition variables
+let level = prompt('level');
+let speed = (level == 1) ? 100 : (level == 2) ? 10 : 1;
+
+// bricks
+let brickArray = [];
+let frames = 0;
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -11,7 +19,7 @@ class Item {
     }
 
     draw() {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.x, this.y, this.width, this.height, this.image);
     }
 }
 
@@ -25,33 +33,55 @@ class Background extends Item {
     draw() {
         this.x-=2;
         if(this.x < -canvas.width) this.x = 0;
-        ctx.drawImage(this.image,this.x,this.y,this.width,this.height); 
-        ctx.drawImage(this.image,this.x + this.width,this.y,this.width,this.height); 
+        ctx.drawImage(this.image,this.x,this.y,this.width,this.height);
+        ctx.drawImage(this.image,this.x + this.width,this.y,this.width,this.height);
     }
 }
 
-class Brick extends Item{
-    constructor(x=0,y, width, height, image) {
-                
+class Brick extends Item {
+     constructor(x, y, width, height, image, direction) {
         super(x,y, width,height, image);
-    }
+        this.direction = direction;
+     }
 
     draw() {
-        ctx.fillStyle = this.image;
-        if(frames % 10) this.x += 2;
+        if(frames % 10) {
+            if(this.direction) this.x += 2;
+            if(!this.direction) this.x -= 2;
+        }
+        ctx.fillStyle = this.image; //color
         ctx.fillRect(this.x,this.y, this.width,this.height);
     }
 }
 
-
-// const secondRow = new Bricks(80, 30, 4, 8, 'orange');
 const background = new Background(0, 0, canvas.width, canvas.height);
-let brickArray = [];
-let frames = 0;
+
+const generateBricks = () => {
+    if(frames % 50 == 0) {
+        const brick = new Brick(0,0, 80,30, 'red', true)
+        if(brickArray.length < 9) brickArray.push(brick);
+    }
+}
+
+const drawEnemies = () => {
+    brickArray.forEach( brick => {
+        // se llego al extremo derecho del canvas
+        if (brick.x + brick.width >= canvas.width + brick.width && brick.direction) {
+            brick.y += 40;
+            brick.direction = false;
+        }
+        // se llego al extremo izquierdo del canvas
+        if(brick.x + brick.width < 0 && !brick.direction) {
+            brick.y += 40;
+            brick.direction = true;
+        }
+        // se llego al fondo del canvas
+        brick.draw();
+    });
+}
 
 const draw = () => {
     background.draw();
-    // firstRow.draw();
     generateBricks();
     drawEnemies();
 }
@@ -59,19 +89,4 @@ const draw = () => {
 setInterval( () => {
     frames++;
     draw();
-}, 1000/60);
-
-const generateBricks = () => { 
-    if(frames % 100 == 0 || frames % 60 == 0 || frames % 170 == 0) {
-        const brick = new Brick(0,80,30,'red');
-        brickArray.push(brick);
-        // console.log(brick);        
-    }
-}
-
-const drawEnemies = () => {
-    brickArray.forEach( x => {
-        x.draw();
-          
-    });
-}
+}, speed/6);
