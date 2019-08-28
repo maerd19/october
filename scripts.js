@@ -6,8 +6,13 @@ let speed = (level == 1) ? 100 : (level == 2) ? 10 : 1;
 let brickArray = [];
 let frames = 0;
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+// Mouse movement
+let mouseX = 0;
+let mouseY = 0;
+let paddleX = 400;
+
+// const canvas = document.getElementById('canvas');
+// const ctx = canvas.getContext('2d');
 
 class Item {
     constructor(x,y, width, height, image) {
@@ -38,6 +43,18 @@ class Background extends Item {
     }
 }
 
+class Player extends Item {
+    constructor(x,y, width,height, image) {
+        super(x,y, width,height, image);
+    }
+
+    draw() {
+        ctx.fillStyle = this.image;
+        ctx.fillRect(this.x,this.y, this.width,this.height);
+        
+    }
+}
+
 class Brick extends Item {
      constructor(x, y, width, height, image, direction) {
         super(x,y, width,height, image);
@@ -55,6 +72,7 @@ class Brick extends Item {
 }
 
 const background = new Background(0, 0, canvas.width, canvas.height);
+const player = new Player(200, 200, )
 
 const generateBricks = () => {
     if(frames % 50 == 0) {
@@ -75,7 +93,11 @@ const drawEnemies = () => {
             brick.y += 40;
             brick.direction = true;
         }
-        // se llego al fondo del canvas
+        // se llego al fondo del canvas        
+        if (brick.y > canvas.height) {
+            brick.y = 0;
+        }
+        
         brick.draw();
     });
 }
@@ -84,9 +106,31 @@ const draw = () => {
     background.draw();
     generateBricks();
     drawEnemies();
+    player.draw();    
 }
 
-setInterval( () => {
-    frames++;
-    draw();
-}, speed/6);
+const updateMousePos = e => {
+    let rect = canvas.getBoundingClientRect();
+    let root = document.documentElement;
+    
+    mouseX = e.clientX - rect.left - root.scrollLeft;
+    mouseY = e.clientY - rect.top - root.scrollTop;
+
+    paddleX = mouseX - PADDLE_WIDTH / 2;
+
+    // ballX = mouseX;
+    // ballY = mouseY;
+}
+
+window.onload = function() {
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+
+
+    setInterval( () => {
+        frames++;
+        draw();
+    }, speed/6);
+
+    canvas.addEventListener('mousemove', updateMousePos);
+}
