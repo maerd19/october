@@ -2,17 +2,45 @@
 let level = prompt('level');
 let speed = (level == 1) ? 100 : (level == 2) ? 10 : 1;
 
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// Mouse position
+let mouseX = 0;
+let mouseY = 0;
+
 // bricks
 let brickArray = [];
 let frames = 0;
 
-// Mouse movement
-let mouseX = 0;
-let mouseY = 0;
-let paddleX = 400;
+let canvasPos = getPosition(canvas)
 
-// const canvas = document.getElementById('canvas');
-// const ctx = canvas.getContext('2d');
+canvas.addEventListener('mousemove', setMousePos);
+
+// Update mouse coordinates
+function setMousePos (e) {
+    mouseX = e.clientX - canvasPos.x;
+    mouseY = e.clientY - canvasPos.y;    
+}
+
+// Set mouse coordinates
+function getPosition(a) {
+    let xPosition = 0;
+    let yPosition = 0;
+
+    while(a) {
+        xPosition += (a.offsetLeft - a.scrollLeft + a.clientLeft);
+        yPosition += (a.offsetTop - a.scrollTop + a.clientTop);
+        a = a.offsetParent;
+    }
+
+    return {
+        x: xPosition,
+        y: yPosition
+    };
+}
+
+
 
 class Item {
     constructor(x,y, width, height, image) {
@@ -44,13 +72,16 @@ class Background extends Item {
 }
 
 class Player extends Item {
-    constructor(x,y, width,height, image) {
-        super(x,y, width,height, image);
+    constructor(width,height, img) {
+        let image = new Image();
+        image.src = 'https://www.spriters-resource.com/resources/sheet_icons/11/11242.png';
+        super(width,height, image);
     }
 
-    draw() {
-        ctx.fillStyle = this.image;
-        ctx.fillRect(this.x,this.y, this.width,this.height);
+    draw(x, y) {
+        // ctx.drawImage(this.image,this.x,this.y,this.width,this.height);
+        // ctx.drawImage(this.image, x, y, this.width,this.height);
+        console.log(x,y);
         
     }
 }
@@ -102,35 +133,19 @@ const drawEnemies = () => {
     });
 }
 
+const moveCharacter = () => {
+    player.draw(mouseX, mouseY);
+    requestAnimationFrame(moveCharacter);
+}
+
 const draw = () => {
     background.draw();
     generateBricks();
     drawEnemies();
-    player.draw();    
 }
 
-const updateMousePos = e => {
-    let rect = canvas.getBoundingClientRect();
-    let root = document.documentElement;
-    
-    mouseX = e.clientX - rect.left - root.scrollLeft;
-    mouseY = e.clientY - rect.top - root.scrollTop;
-
-    paddleX = mouseX - PADDLE_WIDTH / 2;
-
-    // ballX = mouseX;
-    // ballY = mouseY;
-}
-
-window.onload = function() {
-    let canvas = document.getElementById('canvas');
-    let ctx = canvas.getContext('2d');
-
-
-    setInterval( () => {
-        frames++;
-        draw();
-    }, speed/6);
-
-    canvas.addEventListener('mousemove', updateMousePos);
-}
+setInterval( () => {
+    frames++;
+    draw();
+}, speed/6);
+moveCharacter();
