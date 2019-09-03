@@ -1,4 +1,6 @@
-// 5. Disminuir vida de tren cuando los disparos colisionen con el fondo del canvas
+// 1. Mover al tren
+// 3. Barra de vida
+// 4. Animaciones
 
 // Interval to end game
 let interval;
@@ -185,13 +187,16 @@ class Bullets extends Item {
 class Train extends Item {
     constructor(width,height, x,y) {
         let image = new Image();
-        // image.src = 'https://www.spriters-resource.com/resources/sheet_icons/11/11242.png';
         image.src =  'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjsBCgoKDQ0OFQ0MDisZExkrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIADAAMAMBIgACEQEDEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAEBQYHAwL/xAAwEAABAwMCAwYEBwAAAAAAAAABAgMEAAUREiEGMVEHE0FhgZEVI3GhFDJCQ1Ox8f/EABUBAQEAAAAAAAAAAAAAAAAAAAEA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AzW5/JUlOSfOlzr2D1Joua6X0hSxuKVqUA4CRnflQBP459LAZDiu7BJSkbV5TMkNnWHFZ8zmqThzhiLdYneyHHUuqURgKxj6UdP7N5qcm3Pocb050vHSr3AqSc+OCSylmSgIUNgtI2PpTfg0BV43/AIzypBeLBc7O2ly4RVNoKtIVkEZ9Ke9m5C7skHfCFCpFUhhQQc8ga8w7aZMpgaSQtW9Or5F7sa2+RVvQ9l71c9pDKfmIOduZ8cVJUWZbFrlFmZqZ7sAYwDg46A5+1XoWw/BRIivtuIKfzoXke9cJos0e2uXWWC24wg4woBRPLA887eVCWLhpE3hVltbykJmLMrSnGk6uQ9AKSlO0Ql+xPJ1JcUXEBISrO+r/AGkXZrEWm/NNnOSFAn0qu48tbcC3tNIGcOBRIHLYgAdPGlnZs0fjzZOxGrn9DQE3cZMmdjWEtgblKeddOGWXnbsY0UgS1NlUcH9a0jOn1Tq9cUTMhlA2GF/3QjBeg3GNOj7PMOIdRv4g5++Kkr7dw7a+JWlyVyZRubKiHYLroSo9UpyNjzpxcLI7wmI11YvCoUNrQFwn1FYKPFKcE5J35dfCn3EnCdl4stzN9gTU25a29a5Q2SpPiF7jcYxmsv49cgttWWHbpRlttxnHFPlZUVKU4U7k4P7fQeW1JdL3xo3emFtPRFMLLupCwvUNPQ9DTvszZbcu4OcnfHsazI5zmrLs1v8ADtN2Qi5u9yypQCXSNhz59B50B//Z'
         super(x,y, width,height, image);
         this.lifePoints = 50;
+        this.vx = 5;
+        this.direction = true
     }
 
     draw() {
+        (this.direction) ? this.x += 2 : this.x -= 2
+
         ctx.drawImage(this.image,this.x, this.y, this.width, this.height);
     }
 }
@@ -203,7 +208,7 @@ const train = new Train(500, 100, 30, 400);
 
 const generateBricks = () => {
     if(frames % 50 == 0) {
-        const brick = new Brick(0,0, 80,30, 'red', true)
+        const brick = new Brick(0,0, 80,30, 'blue', true)
         if(brickArray.length < 9) brickArray.push(brick);
     }
 }
@@ -225,7 +230,8 @@ const drawEnemies = () => {
             // brick.y = 0;
             gameOver();
         }
-        if(brick.collision(player)) gameOver();
+        // (brick.collision(player) && player.shield > 0) ? player.shield = 0 : gameOver();
+        if (brick.collision(player)) gameOver();
         
         brick.draw();
         if(frames % 200 == 0) brick.shoot();
@@ -254,20 +260,50 @@ const drawBullets = () => {
         });
 
         // Colision con personaje
-        if(bullet.collision(player) && !(bullet.isURSS)) {            
+        if(bullet.collision(player) && !(bullet.isURSS)) {       
             (player.shield <= 0) ? player.lifePoints -= 1 : player.shield -= 1;
-            console.log('golpe con piolet :(');
-            console.log(`shield: ${player.shield} life: ${player.lifePoints}`);
+            console.log(`shield: ${player.shield} player lifepoints: ${player.lifePoints}`);
             bulletArr.splice(i, 1);
             if(player.lifePoints == 0) gameOver();
+        }
+
+        // Colision con tren
+        if(bullet.collision2(train) && !(bullet.isURSS)) {
+            train.lifePoints -= 1;
+            console.log(`train lifepoints: ${train.lifePoints}`);
+            bulletArr.splice(i, 1);
+            if(train.lifePoints == 0) gameOver();
         }
 
         // Colision con fondo del canvas
         if(bullet.y + bullet.height > canvas.height) {
             bulletArr.splice(i, 1);
-            console.log('golpe al tren');            
+        }
+
+        // Colision con canvas derecho
+        if(bullet.x + bullet.width > canvas.width) {
+            bulletArr.splice(i, 1);
+        }
+
+        // Colision con canvas izquierdo
+        if(bullet.x + bullet.width < 0) {
+            bulletArr.splice(i, 1);
         }
     });        
+}
+
+const drawTrain = () => {
+    if((train.x + train.width )- canvas.width >= canvas.width - (train.x+ train.width) && train.direction) {
+       train.direction = false
+    }
+
+    if(( train.x) === 0 && !train.direction) {
+        console.log('voy de retache');
+        
+        train.direction = true
+     }
+
+    train.draw()
 }
 
 function thankYouNext() {
@@ -305,7 +341,8 @@ const draw = () => {
     generateBricks();
     drawEnemies();
     drawBullets();
-    train.draw();
+    //train.draw();
+    drawTrain()
 }
 
 const start =() => {
