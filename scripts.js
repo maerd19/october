@@ -1,6 +1,8 @@
-// 1. Mover al tren
-// 3. Barra de vida
-// 4. Animaciones
+// 1. Barra de vida
+// 2. Animaciones
+// 3. Sonidos =)
+// 4. Transiciones
+// 5. Funcion de terminar juego
 
 // Interval to end game
 let interval;
@@ -201,10 +203,57 @@ class Train extends Item {
     }
 }
 
+function sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+      this.sound.play();
+    }
+    this.stop = function(){
+      this.sound.pause();
+    }
+  }
+
+  class statusBar{
+    constructor(x,y,width,height,radius,color){ 
+    this.width= width;
+    this.height = height;
+    this.x = x;
+    this.y =y;
+    this.radius = radius
+    this.color =color
+    
+    this.update = function(){
+      
+      ctx.fillRect(this.x, this.y,this.width,this.height,this.radius )
+    }
+  }
+  
+  draw(health){
+      ctx.fillStyle = this.color;
+      if(health <= 0)health=0
+      ctx.fillRect(this.x, this.y, health ,this.height,this.radius)
+      }
+    
+  };
+
+  
+
+// Instances
 const background = new Background(0, 0, canvas.width, canvas.height);
+const shieldBar = new statusBar (700,20,250,30,10,'blue');
+const lifeBar = new statusBar (700,40,250,30,10,'green');
+const trainBar = new statusBar (700,60,250,30,10,'orange');
 const player = new Player(200, 200, mouseX, mouseY);
 const train = new Train(500, 100, 30, 400);
-// const bullet = new Bullets(player.x, playery, 50, 50);
+const foeShot = new sound("Shotgun.mp3");
+const yourShot = new sound("grenade-launcher.mp3");
+const main = new sound("international_communist.mp3");
+
 
 const generateBricks = () => {
     if(frames % 50 == 0) {
@@ -221,17 +270,16 @@ const drawEnemies = () => {
             brick.direction = false;
         }
         // se llego al extremo izquierdo del canvas
-        if(brick.x + brick.width < 0 && !brick.direction) {
+        if (brick.x + brick.width < 0 && !brick.direction) {
             brick.y += 40;
             brick.direction = true;
         }
-        // se llego al fondo del canvas        
-        if(brick.y > canvas.height) {
-            // brick.y = 0;
-            gameOver();
-        }
-        // (brick.collision(player) && player.shield > 0) ? player.shield = 0 : gameOver();
-        if (brick.collision(player)) gameOver();
+        // enemigos colisionan con el tren        
+        if (brick.collision(train)) gameOver();
+        // enemigos colisionan con personaje con escudo
+        if (brick.collision(player) && player.shield > 0) player.shield -= 1;
+        // enemigos colisionan con personaje sin escudo
+        if (brick.collision(player) && player.shield == 0) gameOver();        
         
         brick.draw();
         if(frames % 200 == 0) brick.shoot();
@@ -239,28 +287,24 @@ const drawEnemies = () => {
 }
 
 const drawBullets = () => {
-    bulletArr.forEach((bullet, i) => {
-        // Bala salio de canvas por arriba
-        if(bullet.y + bullet.height < 0) {
-            bulletArr.splice(0, 1);
-        }
+    bulletArr.forEach((bullet, i) => {        
         bullet.draw();
-
-        if(frames % 100) bullet.isURSS == false;
+        // generar sonido
+        (bullet.isURSS) ? yourShot.play() : foeShot.play();        
+        if (frames % 100) bullet.isURSS == false;
 
         brickArray.forEach((brick, idx) => {
-            // Colision con brick
+            // Colision con enemigo
             if(bullet.collision2(brick) && bullet.isURSS) {
                 bulletArr.splice(i, 1);
                 brickArray.splice(idx, 1);
                 // (bricksDestroyed == 20) ? gameOver() : bricksDestroyed++;
                 (bricksDestroyed === levelVariables.bricksDestroyed) ? thankYouNext() : bricksDestroyed++;
-                console.log(bricksDestroyed);                
             }            
         });
 
         // Colision con personaje
-        if(bullet.collision(player) && !(bullet.isURSS)) {       
+        if (bullet.collision(player) && !(bullet.isURSS)) {       
             (player.shield <= 0) ? player.lifePoints -= 1 : player.shield -= 1;
             console.log(`shield: ${player.shield} player lifepoints: ${player.lifePoints}`);
             bulletArr.splice(i, 1);
@@ -268,47 +312,44 @@ const drawBullets = () => {
         }
 
         // Colision con tren
-        if(bullet.collision2(train) && !(bullet.isURSS)) {
+        if (bullet.collision2(train) && !(bullet.isURSS)) {
             train.lifePoints -= 1;
             console.log(`train lifepoints: ${train.lifePoints}`);
             bulletArr.splice(i, 1);
             if(train.lifePoints == 0) gameOver();
         }
 
-        // Colision con fondo del canvas
-        if(bullet.y + bullet.height > canvas.height) {
+        // Bala salio de canvas por arriba
+        if (bullet.y + bullet.height < 0) {
             bulletArr.splice(i, 1);
         }
 
-        // Colision con canvas derecho
-        if(bullet.x + bullet.width > canvas.width) {
+        // Bala salio de canvas por abajo
+        if (bullet.y + bullet.height > canvas.height) {
             bulletArr.splice(i, 1);
         }
 
-        // Colision con canvas izquierdo
-        if(bullet.x + bullet.width < 0) {
+        // Bala salio de canvas por la derecha
+        if (bullet.x + bullet.width > canvas.width) {
+            bulletArr.splice(i, 1);
+        }
+
+        // Bala salio de canvas por izquierda
+        if (bullet.x + bullet.width < 0) {
             bulletArr.splice(i, 1);
         }
     });        
 }
 
 const drawTrain = () => {
-    if((train.x + train.width )- canvas.width >= canvas.width - (train.x+ train.width) && train.direction) {
-       train.direction = false
-    }
-
-    if(( train.x) === 0 && !train.direction) {
-        console.log('voy de retache');
-        
-        train.direction = true
-     }
-
+    if ((train.x + train.width )- canvas.width >= canvas.width - (train.x+ train.width) && train.direction) train.direction = false
+    if ((train.x) === 0 && !train.direction) train.direction = true
     train.draw()
 }
 
 function thankYouNext() {
     clearInterval(interval);
-    if(levelVariables.level < 4) {            
+    if (levelVariables.level < 4) {            
             bricksDestroyed = 0;
             interval = undefined;
             brickArray = [];
@@ -336,13 +377,20 @@ const moveCharacter = () => {
     requestAnimationFrame(moveCharacter);
 }
 
+const drawBars = () => {
+    // healthBar.draw(Itzama.health);
+    shieldBar.draw(player.shield)
+    lifeBar.draw(player.lifePoints)
+    trainBar.draw(train.lifePoints)
+}
+
 const draw = () => {
     background.draw();
+    main.play()
     generateBricks();
     drawEnemies();
     drawBullets();
-    //train.draw();
-    drawTrain()
+    drawTrain();
 }
 
 const start =() => {
