@@ -1,8 +1,14 @@
-// 1. Barra de vida
 // 2. Animaciones
-// 3. Sonidos =)
 // 4. Transiciones
 // 5. Funcion de terminar juego
+
+// canvas definition
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// canvas definition
+const canvasScores = document.getElementById('scores');
+const ctxScores = canvasScores.getContext('2d');
 
 // Interval to end game
 let interval;
@@ -14,14 +20,6 @@ let levelVariables = {
     speed: 100,
     level: 1
 }
-
-// level definition variables
-// let level = prompt('level');
-// let speed = (level == 1) ? 100 : (level == 2) ? 10 : 1;
-
-// canvas definition
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
 
 // Mouse position
 let mouseX = 0;
@@ -116,8 +114,8 @@ class Player extends Item {
         // image.src = 'https://www.spriters-resource.com/resources/sheet_icons/11/11242.png';
         image.src =  'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjsBCgoKDQ0OFQ0MDisZExkrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIADAAMAMBIgACEQEDEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAEBQYHAwL/xAAwEAABAwMCAwYEBwAAAAAAAAABAgMEAAUREiEGMVEHE0FhgZEVI3GhFDJCQ1Ox8f/EABUBAQEAAAAAAAAAAAAAAAAAAAEA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AzW5/JUlOSfOlzr2D1Joua6X0hSxuKVqUA4CRnflQBP459LAZDiu7BJSkbV5TMkNnWHFZ8zmqThzhiLdYneyHHUuqURgKxj6UdP7N5qcm3Pocb050vHSr3AqSc+OCSylmSgIUNgtI2PpTfg0BV43/AIzypBeLBc7O2ly4RVNoKtIVkEZ9Ke9m5C7skHfCFCpFUhhQQc8ga8w7aZMpgaSQtW9Or5F7sa2+RVvQ9l71c9pDKfmIOduZ8cVJUWZbFrlFmZqZ7sAYwDg46A5+1XoWw/BRIivtuIKfzoXke9cJos0e2uXWWC24wg4woBRPLA887eVCWLhpE3hVltbykJmLMrSnGk6uQ9AKSlO0Ql+xPJ1JcUXEBISrO+r/AGkXZrEWm/NNnOSFAn0qu48tbcC3tNIGcOBRIHLYgAdPGlnZs0fjzZOxGrn9DQE3cZMmdjWEtgblKeddOGWXnbsY0UgS1NlUcH9a0jOn1Tq9cUTMhlA2GF/3QjBeg3GNOj7PMOIdRv4g5++Kkr7dw7a+JWlyVyZRubKiHYLroSo9UpyNjzpxcLI7wmI11YvCoUNrQFwn1FYKPFKcE5J35dfCn3EnCdl4stzN9gTU25a29a5Q2SpPiF7jcYxmsv49cgttWWHbpRlttxnHFPlZUVKU4U7k4P7fQeW1JdL3xo3emFtPRFMLLupCwvUNPQ9DTvszZbcu4OcnfHsazI5zmrLs1v8ADtN2Qi5u9yypQCXSNhz59B50B//Z'
         super(x,y, width,height, image);
-        this.lifePoints = 1000;
-        this.shield = 100;
+        this.lifePoints = 50;
+        this.shield = 50;
     }
 
     draw(x, y) {
@@ -219,6 +217,7 @@ function sound(src) {
   }
 
   class statusBar{
+
     constructor(x,y,width,height,radius,color){ 
     this.width= width;
     this.height = height;
@@ -229,14 +228,14 @@ function sound(src) {
     
     this.update = function(){
       
-      ctx.fillRect(this.x, this.y,this.width,this.height,this.radius )
+        ctxScores.fillRect(this.x, this.y,this.width,this.height,this.radius )
     }
   }
   
   draw(health){
-      ctx.fillStyle = this.color;
+      ctxScores.fillStyle = this.color;
       if(health <= 0)health=0
-      ctx.fillRect(this.x, this.y, health ,this.height,this.radius)
+      ctxScores.fillRect(this.x, this.y, health ,this.height,this.radius)
       }
     
   };
@@ -244,15 +243,22 @@ function sound(src) {
   
 
 // Instances
+
+// Background
 const background = new Background(0, 0, canvas.width, canvas.height);
-const shieldBar = new statusBar (700,20,250,30,10,'blue');
-const lifeBar = new statusBar (700,40,250,30,10,'green');
-const trainBar = new statusBar (700,60,250,30,10,'orange');
+// LifeBars
+const shieldBar = new statusBar (500,20,250,30,10,'blue');
+const lifeBar = new statusBar (500,40,250,30,10,'green');
+const trainBar = new statusBar (500,60,250,30,10,'orange');
+// Player
 const player = new Player(200, 200, mouseX, mouseY);
 const train = new Train(500, 100, 30, 400);
-const foeShot = new sound("Shotgun.mp3");
-const yourShot = new sound("grenade-launcher.mp3");
-const main = new sound("international_communist.mp3");
+// Sounds
+const yourShot = new sound("./assets/grenade-launcher.mp3");
+const foeShot = new sound("./assets/Shotgun.mp3");
+const main = new sound("./assets/international_communist.mp3");
+const mainFaster = new sound("./assets/international_communist_double.mp3");
+const sad_song = new sound("./assets/sad_song.mp3");
 
 
 const generateBricks = () => {
@@ -355,6 +361,7 @@ function thankYouNext() {
             brickArray = [];
         ctx.fillText("Presiona n para el siguiente nivel", 235, 200);        
         increaseLevel();
+        main.stop();
     }
 }
 
@@ -369,6 +376,8 @@ const increaseLevel = () => {
 
 function gameOver() {    
     ctx.fillText("GameOver morro", 235, 200);
+    (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
+    sad_song.play();
     clearInterval(interval);
   }
 
@@ -378,19 +387,23 @@ const moveCharacter = () => {
 }
 
 const drawBars = () => {
-    // healthBar.draw(Itzama.health);
     shieldBar.draw(player.shield)
     lifeBar.draw(player.lifePoints)
     trainBar.draw(train.lifePoints)
 }
 
+const backgroundMusic = () => {
+    (levelVariables.level == 1) ? main.play() : mainFaster.play();
+}
+
 const draw = () => {
     background.draw();
-    main.play()
+    backgroundMusic();
     generateBricks();
     drawEnemies();
     drawBullets();
     drawTrain();
+    drawBars();
 }
 
 const start =() => {
