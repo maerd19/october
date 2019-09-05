@@ -1,7 +1,9 @@
-// 2. Animaciones
-// 4. Transiciones
-// 5. Funcion de terminar juego
-// 6. Funcion de reiniciar juego
+// 1. Funcion de reiniciar juego hace cosas raras
+// 2. Instrucciones del juego
+// 3. Pintar elementos de las barras
+// 4. Centrar correctamente a trotsky
+// 5. Mostrar cantidad de enemigos a destruir en este nivel
+
 
 // canvas definition
 
@@ -18,6 +20,7 @@ let interval;
 
 let levelVariables = {
     enemyBullets: 5,
+    enemyRangeShooting: 200,
     playerBullets: 3,
     bricksDestroyed: 10,
     speed: 1000,
@@ -36,10 +39,9 @@ let bricksDestroyed = 0;
 // Bullet
 let bulletArr = [];
 
-const shoot = orientation => { 
+const shoot = orientation => {
     let myBullets = bulletArr.filter(bullet => bullet.isURSS == true);
-    console.log(orientation);    
-    if(myBullets.length <= levelVariables.playerBullets) bulletArr.push(new Bullets(mouseX, mouseY, 50, 50, true, orientation));     
+    if(myBullets.length <= levelVariables.playerBullets) bulletArr.push(new Bullets(mouseX, mouseY, 50, 50, true, orientation));
 }
 
 // canvas.addEventListener('mousemove', setMousePos);
@@ -51,7 +53,7 @@ let canvasPos = getPosition(canvas)
 
 function setMousePos (e) {
     mouseX = e.clientX - canvasPos.x;
-    mouseY = e.clientY - canvasPos.y;    
+    mouseY = e.clientY - canvasPos.y;
 }
 
 // Set mouse coordinates
@@ -83,7 +85,7 @@ class Item {
     draw() {
         ctx.drawImage(this.x, this.y, this.width, this.height, this.image);
     }
-    
+
     collision(player) {
         return (
           this.x < mouseX + player.width &&
@@ -94,10 +96,8 @@ class Item {
     }
 }
 
-
-// class Sprite extends Item {
 class Sprite {
-    constructor(img) {      
+    constructor(img) {
     this.image = new Image();
     this.image.src = img;
       this.x = 90;
@@ -107,7 +107,7 @@ class Sprite {
       this.sw = 350;
       this.sh = 400;
     }
-  
+
     draw(x, y) {
       if (this.sx > 1517) this.sx = 0;
       ctx.drawImage(
@@ -123,10 +123,11 @@ class Sprite {
       );
       if (frames % 2 === 0) this.sx += 200;
     }
-} 
+}
 
 class Background extends Item {
-    constructor(x,y, width,height, img = 'http://i.imgur.com/NfzRkvK.png') {
+    constructor(x,y, width,height, img = './assets/images/iceBackground.png') {
+    // constructor(x,y, width,height, img = 'http://i.imgur.com/NfzRkvK.png') {
         let image = new Image();
         image.src = img;
         super(x,y, width,height, image);
@@ -137,13 +138,14 @@ class Background extends Item {
         if(this.x < -canvas.width) this.x = 0;
         ctx.drawImage(this.image,this.x,this.y,this.width,this.height);
         ctx.drawImage(this.image,this.x + this.width,this.y,this.width,this.height);
-    }    
+    }
 }
 
 class Player extends Item {
-    constructor(width,height, x, y, img) {
+  // constructor(width,height, x, y, img) {
+  constructor(width,height, x,y) {
         let image = new Image();
-        image.src = img;
+        // image.src = img;
         super(x,y, width,height, image);
         // hardcode
         this.HClifePoints = 50;
@@ -151,7 +153,7 @@ class Player extends Item {
         // not hardcode
         this.lifePoints = 50;
         this.shield = 50;
-      
+
         this.x = 90;
         this.y = 170;
         this.sx = 0;
@@ -160,7 +162,8 @@ class Player extends Item {
         this.sh = 400;
     }
 
-    draw(x, y) {
+    draw(x, y, image) {
+        this.image.src = `./assets/images/${image}`;
         if (this.sx > 1400) this.sx = 0;
         ctx.drawImage(
             this.image,
@@ -173,30 +176,33 @@ class Player extends Item {
             100,
             100
         );
-        if (frames % 5 === 0) this.sx += 200; 
+        if (frames % 5 === 0) this.sx += 200;
     }
 }
 
 class Brick extends Item {
+
      constructor(x, y, width, height, image, direction) {
+        image = new Image();
         super(x,y, width,height, image);
         this.direction = direction;
      }
 
-    draw() {
+    draw(image) {
         if(frames % 10) {
             if(this.direction) this.x += 2;
             if(!this.direction) this.x -= 2;
         }
-        ctx.fillStyle = this.image; //color
-        ctx.fillRect(this.x,this.y, this.width,this.height);
+
+        this.image.src = `./assets/images/${image}`;
+        ctx.drawImage(this.image,this.x, this.y, this.width, this.height);
     }
 
     shoot() {
         let enemyBullets = bulletArr.filter(bullet => bullet.isURSS == false);
         if (enemyBullets.length <= levelVariables.enemyBullets) {
-        
-            bulletArr.push(new Bullets(this.x, this.y, 50, 50, false)); // allows to shoot only 
+
+            bulletArr.push(new Bullets(this.x, this.y, 50, 50, false)); // allows to shoot only
             console.log(enemyBullets.length);
         }
     }
@@ -205,7 +211,7 @@ class Brick extends Item {
 class Bullets extends Item {
     constructor(x, y, width, height, isURSS, direction) {
         let image = new Image();
-        image.src =  './assets/images/'
+        // image.src =  './assets/images/'
         super(x,y, width,height, image);
         this.isURSS = isURSS;
         this.direction = direction;
@@ -213,15 +219,14 @@ class Bullets extends Item {
 
     draw(image) {
         if (!this.isURSS) (this.y += 1)
-        if (this.direction ==='d') (this.x += 1);
-        if (this.direction ==='a') (this.x -= 1);
         if (this.direction ==='w') (this.y -= 1);
         if (this.direction ==='s') (this.y += 1);
+        if (this.direction ==='d') (this.x += 1);
+        if (this.direction ==='a') (this.x -= 1);
+
         this.image.src = `./assets/images/${image}`;
         ctx.drawImage(this.image,this.x, this.y, this.width, this.height);
     }
-
-
 
     collision2(item) {
         return (
@@ -231,13 +236,12 @@ class Bullets extends Item {
           this.y + this.height > item.y
         );
     }
-    
 }
 
 class Train extends Item {
     constructor(width,height, x,y) {
         let image = new Image();
-        image.src =  './assets/images/'
+        // image.src =  './assets/images/'
         super(x,y, width,height, image);
         this.HClifePoints = 50;
         this.lifePoints = 50;
@@ -267,43 +271,66 @@ function sound(src) {
     }
   }
 
-  class statusBar{
-
-    constructor(x,y,width,height,radius,color){ 
+  class StatusBar{
+    constructor(x,y,width,height,radius,color){
     this.width= width;
     this.height = height;
     this.x = x;
     this.y =y;
     this.radius = radius
     this.color =color
-    
+
     this.update = function(){
-      
+
         ctxScores.fillRect(this.x, this.y,this.width,this.height,this.radius )
     }
   }
-  
-  draw(health, HChealt){
-      let value = (health * this.width) / HChealt;
+
+  draw(health, HChealth){
+      let value = (health * this.width) / HChealth;
       ctxScores.fillStyle = this.color;
       if(health <= 0)value=0
       ctxScores.fillRect(this.x, this.y, value ,this.height,this.radius)
       }
-    
   };
 
-  
+  class ItemStatusBar{
+    // constructor(x,y, width,height, img) {
+    constructor(x,y, width,height, img) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        // let image = new Image();
+        // image.src = img;
+        this.image = new Image();
+        // this.image.src = img;
+        this.image.src = './assets/images/single_trotsky-shield.png';
+    }
+
+    draw() {
+        ctxScores.drawImage(this.x, this.y, this.width, this.height, this.image);
+    }
+  };
+
 
 // Instances
 
 // Background
 const background = new Background(0, 0, canvas.width, canvas.height);
 // LifeBars
-const shieldBar = new statusBar (10,20,650,30,10,'blue');
-const lifeBar = new statusBar (10,60,650,30,10,'red');
-const trainBar = new statusBar (10,100,650,30,10,'yellow');
+const shieldBar = new StatusBar (10,20,650,30,10,'blue');
+const lifeBar = new StatusBar (10,60,650,30,10,'red');
+const trainBar = new StatusBar (10,100,650,30,10,'yellow');
+// const shieldTrotsky = new ItemStatusBar (660, 20, 20, 30, './assets/images/single_trotsky-shield.png')
+// const trotsky = new ItemStatusBar (660, 20, 20, 30, './assets/images/single_trotsky-shield.png')
+// const trotskyTrain = new ItemStatusBar (660, 20, 20, 30, './assets/images/single_train.png')
+const shieldTrotsky = new ItemStatusBar (660, 20, 20, 30)
+const trotsky = new ItemStatusBar (660, 20, 20, 30)
+const trotskyTrain = new ItemStatusBar (660, 20, 20, 30)
 // Player
-const player = new Player(200, 200, mouseX, mouseY, './assets/images/Trostky-right.png');
+// const player = new Player(200, 200, mouseX, mouseY, './assets/images/Trostky-right.png');
+const player = new Player(200, 200, mouseX, mouseY);
 const train = new Train(500, 100, 30, 400);
 // Sounds
 const yourShot = new sound("./assets/grenade-launcher.mp3");
@@ -311,6 +338,7 @@ const foeShot = new sound("./assets/Shotgun.mp3");
 const main = new sound("./assets/international_communist.mp3");
 const mainFaster = new sound("./assets/international_communist_double.mp3");
 const sad_song = new sound("./assets/sad_song.mp3");
+const sovietAnthem = new sound("./assets/soviet_union_anthem.mp3");
 // Sprites
 const explosion = new Sprite('./assets/images/explosion.png');
 
@@ -334,24 +362,32 @@ const drawEnemies = () => {
             brick.y += 40;
             brick.direction = true;
         }
-        // enemigos colisionan con el tren        
+        // enemigos colisionan con el tren
         if (brick.collision(train)) gameOver();
         // enemigos colisionan con personaje con escudo
         if (brick.collision(player) && player.shield > 0) player.shield -= 1;
         // enemigos colisionan con personaje sin escudo
-        if (brick.collision(player) && player.shield == 0) gameOver();        
-        
-        brick.draw();
-        if(frames % 200 == 0) brick.shoot();
+        if (brick.collision(player) && player.shield == 0) gameOver();
+
+        let tankType = 'single_tank.png';
+
+        brick.draw(tankType);
+        // if(frames % 200 == 0) brick.shoot();
+        if(frames % levelVariables.enemyRangeShooting == 0) brick.shoot();
     });
 }
 
 const drawBullets = () => {
     bulletArr.forEach((bullet, i) => {
-        let friendOrFoeBullet = (bullet.isURSS) ? 'red-bullet-vr.png' : 'blue-bullet-vr.png';
+
+        if (this.direction ==='d') (this.x += 1);
+        if (this.direction ==='a') (this.x -= 1);
+
+        // let friendOrFoeBullet = (bullet.isURSS) ? 'red-bullet-vr.png' : 'blue-bullet-vr.png';
+        let friendOrFoeBullet = (bullet.isURSS) ? (bullet.direction == 'd' || bullet.direction == 'a') ? 'red-bullet-hr.png' : 'red-bullet-vr.png' : 'blue-bullet-vr.png';
         bullet.draw(friendOrFoeBullet);
         // generar sonido
-        (bullet.isURSS) ? yourShot.play() : foeShot.play();        
+        (bullet.isURSS) ? yourShot.play() : foeShot.play();
         if (frames % 100) bullet.isURSS == false;
 
         brickArray.forEach((brick, idx) => {
@@ -360,13 +396,12 @@ const drawBullets = () => {
                 explosion.draw(brick.x, brick.y);
                 bulletArr.splice(i, 1);
                 brickArray.splice(idx, 1);
-                // (bricksDestroyed == 20) ? gameOver() : bricksDestroyed++;
-                (bricksDestroyed === levelVariables.bricksDestroyed) ? thankYouNext() : bricksDestroyed++;
-            }            
+                (bricksDestroyed === levelVariables.bricksToDestroy) ? thankYouNext() : bricksDestroyed++;
+            }
         });
 
         // Colision con personaje
-        if (bullet.collision(player) && !(bullet.isURSS)) {       
+        if (bullet.collision(player) && !(bullet.isURSS)) {
             (player.shield <= 0) ? player.lifePoints -= 1 : player.shield -= 1;
             console.log(`shield: ${player.shield} player lifepoints: ${player.lifePoints}`);
             bulletArr.splice(i, 1);
@@ -400,7 +435,7 @@ const drawBullets = () => {
         if (bullet.x + bullet.width < 0) {
             bulletArr.splice(i, 1);
         }
-    });        
+    });
 }
 
 const drawTrain = () => {
@@ -412,26 +447,37 @@ const drawTrain = () => {
 
 function thankYouNext() {
     clearInterval(interval);
-    if (levelVariables.level < 4) {            
+    if (levelVariables.level < 3) {
             bricksDestroyed = 0;
             interval = undefined;
             brickArray = [];
-        ctx.fillText("Presiona n para el siguiente nivel", 235, 200);     
+        ctx.fillText("Presiona n para el siguiente nivel", 235, 200);
         increaseLevel();
         main.stop();
+    } else {
+      victory();
     }
 }
 
 const increaseLevel = () => {
     levelVariables.level += 1;
-    levelVariables.playerBullets = 6;
-    levelVariables.enemyBullets = 10;
+    levelVariables.playerBullets += 6;
+    levelVariables.enemyRangeShooting -= 50;
+    levelVariables.enemyBullets += 10;
     levelVariables.speed = 10;
-    levelVariables.bricksDestroyed = 15;
+    levelVariables.bricksToDestroy = 15;
     console.log(`You've arrived to level ${levelVariables.level}`);
 }
 
-function gameOver() {    
+function victory() {
+    ctx.fillText("Ganaste morro", 235, 200);
+    canvas.removeEventListener('mousemove', () => {}, false);
+    (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
+    sovietAnthem.play();
+    clearInterval(interval);
+  }
+
+function gameOver() {
     ctx.fillText("GameOver morro", 235, 200);
     canvas.removeEventListener('mousemove', () => {}, false);
     (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
@@ -439,10 +485,36 @@ function gameOver() {
     clearInterval(interval);
   }
 
+  function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    interval = undefined;
+    brickArray = [];
+    frames = 0;
+    bricksDestroyed = 0;
+    bulletArr = [];
+    levelVariables = {
+        enemyBullets: 5,
+        playerBullets: 3,
+        bricksDestroyed: 10,
+        speed: 1000,
+        level: 1
+    }
+    main.stop();
+    main.play();
+    draw();
+  }
+
 const moveCharacter = () => {
-    player.draw(mouseX, mouseY);
-    
+    let image = (player.shield > 0) ? 'Trotsky-bubble-right.png' : 'Trostky-right.png';
+    player.draw(mouseX, mouseY, image);
+
     requestAnimationFrame(moveCharacter);
+}
+
+const drawCharsInBars = () => {
+  shieldTrotsky.draw();
+  trotsky.draw();
+  trotskyTrain.draw();
 }
 
 const drawBars = () => {
@@ -462,16 +534,17 @@ const draw = () => {
     drawEnemies();
     drawBullets();
     drawTrain();
+    // drawCharsInBars();
     drawBars();
 }
 
-const start =() => {    
+const start =() => {
     canvas.addEventListener('mousemove', setMousePos);
     interval = setInterval( () => {
         frames++;
         ctxScores.clearRect(0, 0, canvas.width, canvas.height);
         draw();
-        
+
     }, levelVariables.speed/60);
     moveCharacter();
 }
@@ -479,6 +552,8 @@ const start =() => {
 addEventListener('keydown', (e)=>{
     // Startgame
     if(e.keyCode === 78 && !interval) start();
+    if(e.keyCode === 82) reset();
+
     // bullets
     if(e.keyCode === 87 && interval) shoot('w');
     if(e.keyCode === 68 && interval) shoot('d');
