@@ -1,12 +1,15 @@
 // 2. Animaciones
 // 4. Transiciones
 // 5. Funcion de terminar juego
+// 6. Funcion de reiniciar juego
 
 // canvas definition
+
+// canvas game
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-// canvas definition
+// canvas scores
 const canvasScores = document.getElementById('scores');
 const ctxScores = canvasScores.getContext('2d');
 
@@ -17,7 +20,7 @@ let levelVariables = {
     enemyBullets: 5,
     playerBullets: 3,
     bricksDestroyed: 10,
-    speed: 100,
+    speed: 1000,
     level: 1
 }
 
@@ -39,7 +42,7 @@ const shoot = orientation => {
     if(myBullets.length <= levelVariables.playerBullets) bulletArr.push(new Bullets(mouseX, mouseY, 50, 50, true, orientation));     
 }
 
-canvas.addEventListener('mousemove', setMousePos);
+// canvas.addEventListener('mousemove', setMousePos);
 
 
 
@@ -68,8 +71,6 @@ function getPosition(a) {
     };
 }
 
-
-
 class Item {
     constructor(x,y, width, height, image) {
         this.x = x;
@@ -93,6 +94,37 @@ class Item {
     }
 }
 
+
+// class Sprite extends Item {
+class Sprite {
+    constructor(img) {      
+    this.image = new Image();
+    this.image.src = img;
+      this.x = 90;
+      this.y = 170;
+      this.sx = 0;
+      this.sy = 0;
+      this.sw = 350;
+      this.sh = 400;
+    }
+  
+    draw(x, y) {
+      if (this.sx > 1517) this.sx = 0;
+      ctx.drawImage(
+        this.image,
+        this.sx,
+        this.sy,
+        this.sw,
+        this.sh,
+        x,
+        y,
+        60,
+        60
+      );
+      if (frames % 2 === 0) this.sx += 200;
+    }
+} 
+
 class Background extends Item {
     constructor(x,y, width,height, img = 'http://i.imgur.com/NfzRkvK.png') {
         let image = new Image();
@@ -109,17 +141,39 @@ class Background extends Item {
 }
 
 class Player extends Item {
-    constructor(width,height, x, y) {
+    constructor(width,height, x, y, img) {
         let image = new Image();
-        // image.src = 'https://www.spriters-resource.com/resources/sheet_icons/11/11242.png';
-        image.src =  'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjsBCgoKDQ0OFQ0MDisZExkrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIADAAMAMBIgACEQEDEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAEBQYHAwL/xAAwEAABAwMCAwYEBwAAAAAAAAABAgMEAAUREiEGMVEHE0FhgZEVI3GhFDJCQ1Ox8f/EABUBAQEAAAAAAAAAAAAAAAAAAAEA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AzW5/JUlOSfOlzr2D1Joua6X0hSxuKVqUA4CRnflQBP459LAZDiu7BJSkbV5TMkNnWHFZ8zmqThzhiLdYneyHHUuqURgKxj6UdP7N5qcm3Pocb050vHSr3AqSc+OCSylmSgIUNgtI2PpTfg0BV43/AIzypBeLBc7O2ly4RVNoKtIVkEZ9Ke9m5C7skHfCFCpFUhhQQc8ga8w7aZMpgaSQtW9Or5F7sa2+RVvQ9l71c9pDKfmIOduZ8cVJUWZbFrlFmZqZ7sAYwDg46A5+1XoWw/BRIivtuIKfzoXke9cJos0e2uXWWC24wg4woBRPLA887eVCWLhpE3hVltbykJmLMrSnGk6uQ9AKSlO0Ql+xPJ1JcUXEBISrO+r/AGkXZrEWm/NNnOSFAn0qu48tbcC3tNIGcOBRIHLYgAdPGlnZs0fjzZOxGrn9DQE3cZMmdjWEtgblKeddOGWXnbsY0UgS1NlUcH9a0jOn1Tq9cUTMhlA2GF/3QjBeg3GNOj7PMOIdRv4g5++Kkr7dw7a+JWlyVyZRubKiHYLroSo9UpyNjzpxcLI7wmI11YvCoUNrQFwn1FYKPFKcE5J35dfCn3EnCdl4stzN9gTU25a29a5Q2SpPiF7jcYxmsv49cgttWWHbpRlttxnHFPlZUVKU4U7k4P7fQeW1JdL3xo3emFtPRFMLLupCwvUNPQ9DTvszZbcu4OcnfHsazI5zmrLs1v8ADtN2Qi5u9yypQCXSNhz59B50B//Z'
+        image.src = img;
         super(x,y, width,height, image);
+        // hardcode
+        this.HClifePoints = 50;
+        this.HCshield = 50;
+        // not hardcode
         this.lifePoints = 50;
         this.shield = 50;
+      
+        this.x = 90;
+        this.y = 170;
+        this.sx = 0;
+        this.sy = 0;
+        this.sw = 200;
+        this.sh = 400;
     }
 
     draw(x, y) {
-        ctx.drawImage(this.image, x, y, this.width,this.height);        
+        if (this.sx > 1400) this.sx = 0;
+        ctx.drawImage(
+            this.image,
+            this.sx,
+            this.sy,
+            this.sw,
+            this.sh,
+            x,
+            y,
+            100,
+            100
+        );
+        if (frames % 5 === 0) this.sx += 200; 
     }
 }
 
@@ -139,36 +193,32 @@ class Brick extends Item {
     }
 
     shoot() {
-        // if(bulletArr.filter())
         let enemyBullets = bulletArr.filter(bullet => bullet.isURSS == false);
-        // if (enemyBullets.length <= 20) {
         if (enemyBullets.length <= levelVariables.enemyBullets) {
         
-
             bulletArr.push(new Bullets(this.x, this.y, 50, 50, false)); // allows to shoot only 
             console.log(enemyBullets.length);
         }
     }
-
-   
 }
 
 class Bullets extends Item {
     constructor(x, y, width, height, isURSS, direction) {
         let image = new Image();
-        image.src = 'https://www.sccpre.cat/mypng/full/49-495275_bullets-clipart-sprite-bullets-sprite.png',
+        image.src =  './assets/images/'
         super(x,y, width,height, image);
         this.isURSS = isURSS;
         this.direction = direction;
     }
 
-    draw() {
+    draw(image) {
         if (!this.isURSS) (this.y += 1)
         if (this.direction ==='d') (this.x += 1);
         if (this.direction ==='a') (this.x -= 1);
         if (this.direction ==='w') (this.y -= 1);
         if (this.direction ==='s') (this.y += 1);
-        ctx.drawImage(this.image,this.x,this.y,this.width,this.height);
+        this.image.src = `./assets/images/${image}`;
+        ctx.drawImage(this.image,this.x, this.y, this.width, this.height);
     }
 
 
@@ -187,16 +237,17 @@ class Bullets extends Item {
 class Train extends Item {
     constructor(width,height, x,y) {
         let image = new Image();
-        image.src =  'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjsBCgoKDQ0OFQ0MDisZExkrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIADAAMAMBIgACEQEDEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAEBQYHAwL/xAAwEAABAwMCAwYEBwAAAAAAAAABAgMEAAUREiEGMVEHE0FhgZEVI3GhFDJCQ1Ox8f/EABUBAQEAAAAAAAAAAAAAAAAAAAEA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AzW5/JUlOSfOlzr2D1Joua6X0hSxuKVqUA4CRnflQBP459LAZDiu7BJSkbV5TMkNnWHFZ8zmqThzhiLdYneyHHUuqURgKxj6UdP7N5qcm3Pocb050vHSr3AqSc+OCSylmSgIUNgtI2PpTfg0BV43/AIzypBeLBc7O2ly4RVNoKtIVkEZ9Ke9m5C7skHfCFCpFUhhQQc8ga8w7aZMpgaSQtW9Or5F7sa2+RVvQ9l71c9pDKfmIOduZ8cVJUWZbFrlFmZqZ7sAYwDg46A5+1XoWw/BRIivtuIKfzoXke9cJos0e2uXWWC24wg4woBRPLA887eVCWLhpE3hVltbykJmLMrSnGk6uQ9AKSlO0Ql+xPJ1JcUXEBISrO+r/AGkXZrEWm/NNnOSFAn0qu48tbcC3tNIGcOBRIHLYgAdPGlnZs0fjzZOxGrn9DQE3cZMmdjWEtgblKeddOGWXnbsY0UgS1NlUcH9a0jOn1Tq9cUTMhlA2GF/3QjBeg3GNOj7PMOIdRv4g5++Kkr7dw7a+JWlyVyZRubKiHYLroSo9UpyNjzpxcLI7wmI11YvCoUNrQFwn1FYKPFKcE5J35dfCn3EnCdl4stzN9gTU25a29a5Q2SpPiF7jcYxmsv49cgttWWHbpRlttxnHFPlZUVKU4U7k4P7fQeW1JdL3xo3emFtPRFMLLupCwvUNPQ9DTvszZbcu4OcnfHsazI5zmrLs1v8ADtN2Qi5u9yypQCXSNhz59B50B//Z'
+        image.src =  './assets/images/'
         super(x,y, width,height, image);
+        this.HClifePoints = 50;
         this.lifePoints = 50;
         this.vx = 5;
         this.direction = true
     }
 
-    draw() {
+    draw(image) {
         (this.direction) ? this.x += 2 : this.x -= 2
-
+        this.image.src = `./assets/images/${image}`;
         ctx.drawImage(this.image,this.x, this.y, this.width, this.height);
     }
 }
@@ -232,10 +283,11 @@ function sound(src) {
     }
   }
   
-  draw(health){
+  draw(health, HChealt){
+      let value = (health * this.width) / HChealt;
       ctxScores.fillStyle = this.color;
-      if(health <= 0)health=0
-      ctxScores.fillRect(this.x, this.y, health ,this.height,this.radius)
+      if(health <= 0)value=0
+      ctxScores.fillRect(this.x, this.y, value ,this.height,this.radius)
       }
     
   };
@@ -247,11 +299,11 @@ function sound(src) {
 // Background
 const background = new Background(0, 0, canvas.width, canvas.height);
 // LifeBars
-const shieldBar = new statusBar (500,20,250,30,10,'blue');
-const lifeBar = new statusBar (500,40,250,30,10,'green');
-const trainBar = new statusBar (500,60,250,30,10,'orange');
+const shieldBar = new statusBar (10,20,650,30,10,'blue');
+const lifeBar = new statusBar (10,60,650,30,10,'red');
+const trainBar = new statusBar (10,100,650,30,10,'yellow');
 // Player
-const player = new Player(200, 200, mouseX, mouseY);
+const player = new Player(200, 200, mouseX, mouseY, './assets/images/Trostky-right.png');
 const train = new Train(500, 100, 30, 400);
 // Sounds
 const yourShot = new sound("./assets/grenade-launcher.mp3");
@@ -259,6 +311,8 @@ const foeShot = new sound("./assets/Shotgun.mp3");
 const main = new sound("./assets/international_communist.mp3");
 const mainFaster = new sound("./assets/international_communist_double.mp3");
 const sad_song = new sound("./assets/sad_song.mp3");
+// Sprites
+const explosion = new Sprite('./assets/images/explosion.png');
 
 
 const generateBricks = () => {
@@ -293,8 +347,9 @@ const drawEnemies = () => {
 }
 
 const drawBullets = () => {
-    bulletArr.forEach((bullet, i) => {        
-        bullet.draw();
+    bulletArr.forEach((bullet, i) => {
+        let friendOrFoeBullet = (bullet.isURSS) ? 'red-bullet-vr.png' : 'blue-bullet-vr.png';
+        bullet.draw(friendOrFoeBullet);
         // generar sonido
         (bullet.isURSS) ? yourShot.play() : foeShot.play();        
         if (frames % 100) bullet.isURSS == false;
@@ -302,6 +357,7 @@ const drawBullets = () => {
         brickArray.forEach((brick, idx) => {
             // Colision con enemigo
             if(bullet.collision2(brick) && bullet.isURSS) {
+                explosion.draw(brick.x, brick.y);
                 bulletArr.splice(i, 1);
                 brickArray.splice(idx, 1);
                 // (bricksDestroyed == 20) ? gameOver() : bricksDestroyed++;
@@ -350,7 +406,8 @@ const drawBullets = () => {
 const drawTrain = () => {
     if ((train.x + train.width )- canvas.width >= canvas.width - (train.x+ train.width) && train.direction) train.direction = false
     if ((train.x) === 0 && !train.direction) train.direction = true
-    train.draw()
+    let trainImage = (train.direction) ? 'train_right.png' : 'train_left.png';
+    train.draw(trainImage);
 }
 
 function thankYouNext() {
@@ -359,7 +416,7 @@ function thankYouNext() {
             bricksDestroyed = 0;
             interval = undefined;
             brickArray = [];
-        ctx.fillText("Presiona n para el siguiente nivel", 235, 200);        
+        ctx.fillText("Presiona n para el siguiente nivel", 235, 200);     
         increaseLevel();
         main.stop();
     }
@@ -376,6 +433,7 @@ const increaseLevel = () => {
 
 function gameOver() {    
     ctx.fillText("GameOver morro", 235, 200);
+    canvas.removeEventListener('mousemove', () => {}, false);
     (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
     sad_song.play();
     clearInterval(interval);
@@ -383,13 +441,14 @@ function gameOver() {
 
 const moveCharacter = () => {
     player.draw(mouseX, mouseY);
+    
     requestAnimationFrame(moveCharacter);
 }
 
 const drawBars = () => {
-    shieldBar.draw(player.shield)
-    lifeBar.draw(player.lifePoints)
-    trainBar.draw(train.lifePoints)
+    shieldBar.draw(player.shield, player.HCshield);
+    lifeBar.draw(player.lifePoints, player.HClifePoints);
+    trainBar.draw(train.lifePoints, train.HClifePoints);
 }
 
 const backgroundMusic = () => {
@@ -406,17 +465,21 @@ const draw = () => {
     drawBars();
 }
 
-const start =() => {
+const start =() => {    
+    canvas.addEventListener('mousemove', setMousePos);
     interval = setInterval( () => {
         frames++;
+        ctxScores.clearRect(0, 0, canvas.width, canvas.height);
         draw();
-    }, levelVariables.speed/6);
+        
+    }, levelVariables.speed/60);
     moveCharacter();
 }
 
 addEventListener('keydown', (e)=>{
+    // Startgame
     if(e.keyCode === 78 && !interval) start();
-
+    // bullets
     if(e.keyCode === 87 && interval) shoot('w');
     if(e.keyCode === 68 && interval) shoot('d');
     if(e.keyCode === 65 && interval) shoot('a');
