@@ -4,6 +4,13 @@
   background-position: center;
 }
 
+.main-container {
+  background: red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .content {
     display: flex;
     flex-direction: column;

@@ -459,6 +459,8 @@ function thankYouNext() {
         ctx.drawImage(next, 200, 100, 500, 270);
         increaseLevel();
         main.stop();
+        clearInterval(interval);
+        canvas.removeEventListener('mousemove', setMousePos, false);
     } else {
       victory();
     }
@@ -476,19 +478,19 @@ const increaseLevel = () => {
 
 function victory() {
     ctx.fillText("Ganaste morro", 235, 200);
-    canvas.removeEventListener('mousemove', () => {}, false);
     (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
     sovietAnthem.play();
     clearInterval(interval);
+    canvas.removeEventListener('mousemove', setMousePos, false);
   }
 
 function gameOver() {
-    // ctx.fillText("GameOver morro", 235, 200);
     ctx.drawImage(loser, 200, 100, 500, 270);
-    canvas.removeEventListener('mousemove', () => {}, false);
     (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
     sad_song.play();
     clearInterval(interval);
+    canvas.removeEventListener('mousemove', setMousePos, false);
+
   }
 
   function reset() {
