@@ -1,9 +1,15 @@
 // 1. Funcion de reiniciar juego hace cosas raras
 // 2. Instrucciones del juego
-// 3. Pintar elementos de las barras
-// 4. Centrar correctamente a trotsky
 // 5. Mostrar cantidad de enemigos a destruir en este nivel
 
+let loser = new Image();
+loser.src = "./assets/images/gameOver.jpg";
+
+let next = new Image();
+next.src = "./assets/images/nextLevel.jpg";
+
+// let winner = new Image();
+// winner.src = "./images/gameOver.jpg";
 
 // canvas definition
 
@@ -22,7 +28,7 @@ let levelVariables = {
     enemyBullets: 5,
     enemyRangeShooting: 200,
     playerBullets: 3,
-    bricksDestroyed: 10,
+    bricksToDestroy: 10,
     speed: 1000,
     level: 1
 }
@@ -164,7 +170,7 @@ class Player extends Item {
 
     draw(x, y, image) {
         this.image.src = `./assets/images/${image}`;
-        if (this.sx > 1400) this.sx = 0;
+        if (this.sx > 3000) this.sx = 0;
         ctx.drawImage(
             this.image,
             this.sx,
@@ -176,7 +182,7 @@ class Player extends Item {
             100,
             100
         );
-        if (frames % 5 === 0) this.sx += 200;
+        if (frames % 5 === 0) this.sx += 209;
     }
 }
 
@@ -203,7 +209,7 @@ class Brick extends Item {
         if (enemyBullets.length <= levelVariables.enemyBullets) {
 
             bulletArr.push(new Bullets(this.x, this.y, 50, 50, false)); // allows to shoot only
-            console.log(enemyBullets.length);
+            // console.log(enemyBullets.length);
         }
     }
 }
@@ -244,7 +250,7 @@ class Train extends Item {
         // image.src =  './assets/images/'
         super(x,y, width,height, image);
         this.HClifePoints = 50;
-        this.lifePoints = 50;
+        this.lifePoints = 100;
         this.vx = 5;
         this.direction = true
     }
@@ -296,20 +302,20 @@ function sound(src) {
 
   class ItemStatusBar{
     // constructor(x,y, width,height, img) {
-    constructor(x,y, width,height, img) {
+    constructor(x,y, width,height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        // let image = new Image();
+        let image = new Image();
         // image.src = img;
         this.image = new Image();
         // this.image.src = img;
-        this.image.src = './assets/images/single_trotsky-shield.png';
     }
 
-    draw() {
-        ctxScores.drawImage(this.x, this.y, this.width, this.height, this.image);
+    draw(image) {
+        this.image.src = `./assets/images/${image}`;
+        ctxScores.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
   };
 
@@ -320,14 +326,11 @@ function sound(src) {
 const background = new Background(0, 0, canvas.width, canvas.height);
 // LifeBars
 const shieldBar = new StatusBar (10,20,650,30,10,'blue');
-const lifeBar = new StatusBar (10,60,650,30,10,'red');
+const lifeBar = new StatusBar (10,60,650,30,10,'green');
 const trainBar = new StatusBar (10,100,650,30,10,'yellow');
-// const shieldTrotsky = new ItemStatusBar (660, 20, 20, 30, './assets/images/single_trotsky-shield.png')
-// const trotsky = new ItemStatusBar (660, 20, 20, 30, './assets/images/single_trotsky-shield.png')
-// const trotskyTrain = new ItemStatusBar (660, 20, 20, 30, './assets/images/single_train.png')
-const shieldTrotsky = new ItemStatusBar (660, 20, 20, 30)
-const trotsky = new ItemStatusBar (660, 20, 20, 30)
-const trotskyTrain = new ItemStatusBar (660, 20, 20, 30)
+const shieldTrotsky = new ItemStatusBar (660, 20, 40, 30)
+const trotsky = new ItemStatusBar (660, 60, 40, 30)
+const trotskyTrain = new ItemStatusBar (660, 100, 40, 30)
 // Player
 // const player = new Player(200, 200, mouseX, mouseY, './assets/images/Trostky-right.png');
 const player = new Player(200, 200, mouseX, mouseY);
@@ -396,6 +399,7 @@ const drawBullets = () => {
                 explosion.draw(brick.x, brick.y);
                 bulletArr.splice(i, 1);
                 brickArray.splice(idx, 1);
+                console.log(`bricks destroyed: ${bricksDestroyed} | bricks to destroy ${levelVariables.bricksToDestroy}`);                
                 (bricksDestroyed === levelVariables.bricksToDestroy) ? thankYouNext() : bricksDestroyed++;
             }
         });
@@ -403,7 +407,7 @@ const drawBullets = () => {
         // Colision con personaje
         if (bullet.collision(player) && !(bullet.isURSS)) {
             (player.shield <= 0) ? player.lifePoints -= 1 : player.shield -= 1;
-            console.log(`shield: ${player.shield} player lifepoints: ${player.lifePoints}`);
+            // console.log(`shield: ${player.shield} player lifepoints: ${player.lifePoints}`);
             bulletArr.splice(i, 1);
             if(player.lifePoints == 0) gameOver();
         }
@@ -411,7 +415,7 @@ const drawBullets = () => {
         // Colision con tren
         if (bullet.collision2(train) && !(bullet.isURSS)) {
             train.lifePoints -= 1;
-            console.log(`train lifepoints: ${train.lifePoints}`);
+            // console.log(`train lifepoints: ${train.lifePoints}`);
             bulletArr.splice(i, 1);
             if(train.lifePoints == 0) gameOver();
         }
@@ -451,7 +455,8 @@ function thankYouNext() {
             bricksDestroyed = 0;
             interval = undefined;
             brickArray = [];
-        ctx.fillText("Presiona n para el siguiente nivel", 235, 200);
+        // ctx.fillText("Presiona n para el siguiente nivel", 235, 200);
+        ctx.drawImage(next, 200, 100, 500, 270);
         increaseLevel();
         main.stop();
     } else {
@@ -465,7 +470,7 @@ const increaseLevel = () => {
     levelVariables.enemyRangeShooting -= 50;
     levelVariables.enemyBullets += 10;
     levelVariables.speed = 10;
-    levelVariables.bricksToDestroy = 15;
+    levelVariables.bricksToDestroy += 8;
     console.log(`You've arrived to level ${levelVariables.level}`);
 }
 
@@ -478,7 +483,8 @@ function victory() {
   }
 
 function gameOver() {
-    ctx.fillText("GameOver morro", 235, 200);
+    // ctx.fillText("GameOver morro", 235, 200);
+    ctx.drawImage(loser, 200, 100, 500, 270);
     canvas.removeEventListener('mousemove', () => {}, false);
     (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
     sad_song.play();
@@ -512,9 +518,9 @@ const moveCharacter = () => {
 }
 
 const drawCharsInBars = () => {
-  shieldTrotsky.draw();
-  trotsky.draw();
-  trotskyTrain.draw();
+  shieldTrotsky.draw('trotskycondon.png');
+  trotsky.draw('single_trotsky.png');
+  trotskyTrain.draw('single_train.png');
 }
 
 const drawBars = () => {
@@ -534,7 +540,7 @@ const draw = () => {
     drawEnemies();
     drawBullets();
     drawTrain();
-    // drawCharsInBars();
+    drawCharsInBars();
     drawBars();
 }
 
