@@ -1,14 +1,17 @@
+* {
+  font-family: Motherland;
+  color: yellow;
+}
+
 #game {
   background-image: url("../assets/images/Flag_of_the_Soviet_Union.png");
   background-repeat: no-repeat;
   background-position: center;
 }
 
-.main-container {
-  background: red;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#start {
+  margin: 0;
+  font-size: 300%;
 }
 
 .content {
@@ -16,4 +19,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+@font-face {
+  font-family: 'Motherland';
+  src: URL('../assets/fonts/motherland/motherland.ttf') format('truetype');
 }

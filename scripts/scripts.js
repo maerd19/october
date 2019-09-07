@@ -1,6 +1,5 @@
 // 1. Funcion de reiniciar juego hace cosas raras
 // 2. Instrucciones del juego
-// 5. Mostrar cantidad de enemigos a destruir en este nivel
 
 let loser = new Image();
 loser.src = "./assets/images/gameOver.jpg";
@@ -8,8 +7,8 @@ loser.src = "./assets/images/gameOver.jpg";
 let next = new Image();
 next.src = "./assets/images/nextLevel.jpg";
 
-// let winner = new Image();
-// winner.src = "./images/gameOver.jpg";
+let winner = new Image();
+winner.src = "./assets/images/logo.png";
 
 // canvas definition
 
@@ -34,8 +33,8 @@ let levelVariables = {
 }
 
 // Mouse position
-let mouseX = 0;
-let mouseY = 0;
+let mouseX = 350;
+let mouseY = 200;
 
 // bricks
 let brickArray = [];
@@ -49,10 +48,6 @@ const shoot = orientation => {
     let myBullets = bulletArr.filter(bullet => bullet.isURSS == true);
     if(myBullets.length <= levelVariables.playerBullets) bulletArr.push(new Bullets(mouseX, mouseY, 50, 50, true, orientation));
 }
-
-// canvas.addEventListener('mousemove', setMousePos);
-
-
 
 // Update mouse coordinates
 let canvasPos = getPosition(canvas)
@@ -450,12 +445,12 @@ const drawTrain = () => {
 }
 
 function thankYouNext() {
+    document.getElementById('start').textContent = 'Press N to continue';
     clearInterval(interval);
     if (levelVariables.level < 3) {
             bricksDestroyed = 0;
             interval = undefined;
             brickArray = [];
-        // ctx.fillText("Presiona n para el siguiente nivel", 235, 200);
         ctx.drawImage(next, 200, 100, 500, 270);
         increaseLevel();
         main.stop();
@@ -477,7 +472,9 @@ const increaseLevel = () => {
 }
 
 function victory() {
-    ctx.fillText("Ganaste morro", 235, 200);
+    // ctx.fillText("Ganaste morro", 235, 200);
+    document.getElementById('start').textContent = 'You\'ve won';
+    ctx.drawImage(winner, 50, 50, 684, 270);
     (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
     sovietAnthem.play();
     clearInterval(interval);
@@ -485,6 +482,7 @@ function victory() {
   }
 
 function gameOver() {
+    document.getElementById('start').textContent = 'You\'ve lost';
     ctx.drawImage(loser, 200, 100, 500, 270);
     (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
     sad_song.play();
@@ -523,6 +521,9 @@ const drawCharsInBars = () => {
   shieldTrotsky.draw('trotskycondon.png');
   trotsky.draw('single_trotsky.png');
   trotskyTrain.draw('single_train.png');
+  ctxScores.font = "20px Motherland";
+  ctxScores.fillText(`Destoy ${levelVariables.bricksToDestroy - (bricksDestroyed)} tanks`, 620, 190);
+  ctxScores.fillText(`Level ${levelVariables.level}`, 10, 190);
 }
 
 const drawBars = () => {
