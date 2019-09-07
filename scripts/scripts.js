@@ -1,5 +1,24 @@
 // 1. Funcion de reiniciar juego hace cosas raras
-// 2. Instrucciones del juego
+// let difficulty = ''
+// let trainLifePoints = 0
+// switch (levelvariables.difficulty) {
+//   case 'easy':
+//     console.log(`logdifficulty: ${levelvariables.difficulty}`);
+//     trainLifePoints = 100;
+//     break;
+//   case 'medium':
+//     console.log(`logdifficulty: ${levelvariables.difficulty}`);
+//     trainLifePoints = 80;
+//     break;
+//   case 'hard':
+//     console.log(`logdifficulty: ${levelvariables.difficulty}`);
+//     trainLifePoints = 50;
+//     break;
+//   default:
+//     console.log(`default case logdifficulty: ${levelvariables.difficulty}`);
+//     trainLifePoints = 69;
+//     break;
+// }
 
 let loser = new Image();
 loser.src = "./assets/images/gameOver.jpg";
@@ -24,6 +43,7 @@ const ctxScores = canvasScores.getContext('2d');
 let interval;
 
 let levelVariables = {
+    // difficulty: difficulty,
     enemyBullets: 5,
     enemyRangeShooting: 200,
     playerBullets: 3,
@@ -241,11 +261,13 @@ class Bullets extends Item {
 
 class Train extends Item {
     constructor(width,height, x,y) {
+    // constructor(width,height, x,y, life) {
         let image = new Image();
-        // image.src =  './assets/images/'
         super(x,y, width,height, image);
-        this.HClifePoints = 50;
+        this.HClifePoints = 100;
         this.lifePoints = 100;
+        // this.HClifePoints = life;
+        // this.lifePoints = life;
         this.vx = 5;
         this.direction = true
     }
@@ -329,12 +351,15 @@ const trotskyTrain = new ItemStatusBar (660, 100, 40, 30)
 // Player
 // const player = new Player(200, 200, mouseX, mouseY, './assets/images/Trostky-right.png');
 const player = new Player(200, 200, mouseX, mouseY);
+// trainLifePoints = (difficulty === 'easy') ? 100 : (difficulty === 'medium') ? 80 : 600;
 const train = new Train(500, 100, 30, 400);
+// const train = new Train(500, 100, 30, 400, trainLifePoints);
 // Sounds
 const yourShot = new sound("./assets/grenade-launcher.mp3");
 const foeShot = new sound("./assets/Shotgun.mp3");
 const main = new sound("./assets/international_communist.mp3");
 const mainFaster = new sound("./assets/international_communist_double.mp3");
+const mainFastest = new sound("./assets/international_communist_triple.mp3");
 const sad_song = new sound("./assets/sad_song.mp3");
 const sovietAnthem = new sound("./assets/soviet_union_anthem.mp3");
 // Sprites
@@ -394,7 +419,7 @@ const drawBullets = () => {
                 explosion.draw(brick.x, brick.y);
                 bulletArr.splice(i, 1);
                 brickArray.splice(idx, 1);
-                console.log(`bricks destroyed: ${bricksDestroyed} | bricks to destroy ${levelVariables.bricksToDestroy}`);                
+                // console.log(`bricks destroyed: ${bricksDestroyed} | bricks to destroy ${levelVariables.bricksToDestroy}`);
                 (bricksDestroyed === levelVariables.bricksToDestroy) ? thankYouNext() : bricksDestroyed++;
             }
         });
@@ -410,7 +435,7 @@ const drawBullets = () => {
         // Colision con tren
         if (bullet.collision2(train) && !(bullet.isURSS)) {
             train.lifePoints -= 1;
-            // console.log(`train lifepoints: ${train.lifePoints}`);
+            console.log(`train lifepoints: ${train.lifePoints}`);
             bulletArr.splice(i, 1);
             if(train.lifePoints == 0) gameOver();
         }
@@ -453,7 +478,9 @@ function thankYouNext() {
             brickArray = [];
         ctx.drawImage(next, 200, 100, 500, 270);
         increaseLevel();
-        main.stop();
+        // main.stop();
+        if (levelVariables.level == 2) main.stop();
+        if (levelVariables.level == 3) mainFaster.stop();
         clearInterval(interval);
         canvas.removeEventListener('mousemove', setMousePos, false);
     } else {
@@ -468,14 +495,16 @@ const increaseLevel = () => {
     levelVariables.enemyBullets += 10;
     levelVariables.speed = 10;
     levelVariables.bricksToDestroy += 8;
-    console.log(`You've arrived to level ${levelVariables.level}`);
+    // console.log(`You've arrived to level ${levelVariables.level}`);
 }
 
 function victory() {
     // ctx.fillText("Ganaste morro", 235, 200);
     document.getElementById('start').textContent = 'You\'ve won';
     ctx.drawImage(winner, 50, 50, 684, 270);
-    (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
+    // (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
+    // (levelVariables.level == 1) ? main.stop() : (levelVariables.level == 2) ? mainFaster.stop() : mainFastest.stop();
+    mainFastest.stop();
     sovietAnthem.play();
     clearInterval(interval);
     canvas.removeEventListener('mousemove', setMousePos, false);
@@ -484,7 +513,8 @@ function victory() {
 function gameOver() {
     document.getElementById('start').textContent = 'You\'ve lost';
     ctx.drawImage(loser, 200, 100, 500, 270);
-    (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
+    // (levelVariables.level == 1) ? main.stop() : mainFaster.stop();
+    (levelVariables.level == 1) ? main.stop() : (levelVariables.level == 2) ? mainFaster.stop() : mainFastest.stop();
     sad_song.play();
     clearInterval(interval);
     canvas.removeEventListener('mousemove', setMousePos, false);
@@ -522,7 +552,7 @@ const drawCharsInBars = () => {
   trotsky.draw('single_trotsky.png');
   trotskyTrain.draw('single_train.png');
   ctxScores.font = "20px Motherland";
-  ctxScores.fillText(`Destoy ${levelVariables.bricksToDestroy - (bricksDestroyed)} tanks`, 620, 190);
+  ctxScores.fillText(`Destroy ${levelVariables.bricksToDestroy - (bricksDestroyed)} tanks`, 620, 190);
   ctxScores.fillText(`Level ${levelVariables.level}`, 10, 190);
 }
 
@@ -533,10 +563,11 @@ const drawBars = () => {
 }
 
 const backgroundMusic = () => {
-    (levelVariables.level == 1) ? main.play() : mainFaster.play();
+    (levelVariables.level == 1) ? main.play() : (levelVariables.level == 2) ? mainFaster.play() : mainFastest.play();
 }
 
 const draw = () => {
+    // console.log(`logdifficulty: ${difficulty.difficulty}`);
     background.draw();
     backgroundMusic();
     generateBricks();
@@ -548,6 +579,7 @@ const draw = () => {
 }
 
 const start =() => {
+    // console.log(`difficulty: ${difficulty.difficulty}`);
     canvas.addEventListener('mousemove', setMousePos);
     interval = setInterval( () => {
         frames++;

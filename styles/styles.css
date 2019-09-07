@@ -14,6 +14,18 @@
   font-size: 300%;
 }
 
+.levels {
+  font-size: 300%;
+  text-align: center;
+}
+
+.levelSelection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .content {
     display: flex;
     flex-direction: column;
